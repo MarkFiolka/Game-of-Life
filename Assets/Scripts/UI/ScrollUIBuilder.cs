@@ -26,7 +26,7 @@ public static class ScrollUIBuilder
         scrollView.style.marginRight = 10;
         scrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
-        var useButton = new Button(() => {}) { text = "Use" };
+        var useButton = new Button(() => {}) { text = "USE" };
         useButton.style.position = Position.Absolute;
         useButton.style.right = 10;
         useButton.style.top = new Length(50, LengthUnit.Percent);
