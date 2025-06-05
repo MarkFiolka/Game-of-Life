@@ -13,12 +13,14 @@ public class DynamicScrollView : MonoBehaviour
     private bool isUserScrolling = false;
     private float smoothTime = 0.15f;
 
-    private const int TotalButtons = 111;
     private const int VisibleCount = 9;
     private const float ButtonHeight = 104f;
-    private const float LoopTriggerDistance = ButtonHeight * TotalButtons * 0.5f;
+
+    private int objCount = 0;
+    private float loopTriggerDistance => ButtonHeight * objCount * 0.5f;
 
     private Button selectedButton = null;
+    private PatternList patternList;
 
     void OnEnable()
     {
@@ -43,6 +45,11 @@ public class DynamicScrollView : MonoBehaviour
         rightContainer.Add(scrollView);
         root.Add(leftSpacer);
         root.Add(rightContainer);
+
+        patternList = GetComponent<PatternList>();
+        if (patternList == null) Debug.LogWarning("No Pattern List found!");
+
+        objCount = patternList.getObjectCount();
 
         PopulateButtons();
         CenterScroll();
@@ -82,23 +89,23 @@ public class DynamicScrollView : MonoBehaviour
         scrollView.Clear();
         buttons.Clear();
 
-        for (int i = -TotalButtons; i < TotalButtons * 2; i++)
+        for (int i = -objCount; i < objCount * 2; i++)
         {
-            int index = (i + TotalButtons) % TotalButtons;
+            int index = (i + objCount) % objCount;
             var button = new Button();
             button.style.marginBottom = 4;
             button.style.width = Length.Percent(70);
             button.style.height = 100;
             button.style.alignSelf = Align.FlexEnd;
 
-            var label = new Label($"Item {index + 1}");
+            var currentPattern = patternList.getObjectAtIndex(index);
+            var label = new Label(currentPattern.name);
             label.style.unityTextAlign = TextAnchor.MiddleCenter;
-            label.style.fontSize = 100;
+            label.style.fontSize = 50;
             label.style.flexGrow = 1;
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
 
             button.Add(label);
-
             button.clicked += () => CenterButtonInScrollView(button);
 
             scrollView.Add(button);
@@ -108,7 +115,7 @@ public class DynamicScrollView : MonoBehaviour
 
     private void CenterScroll()
     {
-        float centerY = TotalButtons * ButtonHeight;
+        float centerY = objCount * ButtonHeight;
         scrollView.scrollOffset = new Vector2(0, centerY);
         currentScrollTargetY = centerY;
     }
@@ -116,7 +123,7 @@ public class DynamicScrollView : MonoBehaviour
     private void HandleLooping()
     {
         float offsetY = scrollView.scrollOffset.y;
-        float loopHeight = TotalButtons * ButtonHeight;
+        float loopHeight = objCount * ButtonHeight;
 
         if (offsetY < ButtonHeight)
         {
