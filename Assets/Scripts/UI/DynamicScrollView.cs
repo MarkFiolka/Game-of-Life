@@ -18,6 +18,8 @@ public class DynamicScrollView : MonoBehaviour
     private const float ButtonHeight = 104f;
     private const float LoopTriggerDistance = ButtonHeight * TotalButtons * 0.5f;
 
+    private Button selectedButton = null;
+
     void OnEnable()
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
@@ -48,6 +50,10 @@ public class DynamicScrollView : MonoBehaviour
 
     void LateUpdate()
     {
+        float centerY = scrollView.worldBound.center.y;
+        float topY = scrollView.worldBound.yMin;
+        float bottomY = scrollView.worldBound.yMax;
+
         float wheelInput = Input.GetAxis("Mouse ScrollWheel");
         if (Mathf.Abs(wheelInput) > 0.01f)
         {
@@ -68,6 +74,7 @@ public class DynamicScrollView : MonoBehaviour
         }
 
         HandleLooping();
+        UpdateVisuals();
     }
 
     private void PopulateButtons()
@@ -91,6 +98,9 @@ public class DynamicScrollView : MonoBehaviour
             label.style.unityFontStyleAndWeight = FontStyle.Bold;
 
             button.Add(label);
+
+            button.clicked += () => CenterButtonInScrollView(button);
+
             scrollView.Add(button);
             buttons.Add(button);
         }
@@ -118,5 +128,56 @@ public class DynamicScrollView : MonoBehaviour
             scrollView.scrollOffset -= new Vector2(0, loopHeight);
             currentScrollTargetY -= loopHeight;
         }
+    }
+
+    private void UpdateVisuals()
+    {
+        float centerY = scrollView.worldBound.center.y;
+        float topY = scrollView.worldBound.yMin;
+        float bottomY = scrollView.worldBound.yMax;
+
+        float minDistance = float.MaxValue;
+        Button closestButton = null;
+
+        foreach (var button in buttons)
+        {
+            float buttonY = button.worldBound.center.y;
+            float normalizedY = Mathf.InverseLerp(topY, bottomY, buttonY);
+
+            float curveOffset = -Mathf.Sin(normalizedY * Mathf.PI) * 100f;
+            button.style.translate = new Translate(curveOffset, 0, 0);
+
+            float distance = Mathf.Abs(centerY - buttonY);
+            float t = Mathf.Clamp01(distance / 400f);
+            button.style.opacity = Mathf.Lerp(1f, 0.3f, t);
+
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestButton = button;
+            }
+        }
+
+        if (selectedButton != null)
+        {
+            selectedButton.RemoveFromClassList("selected");
+        }
+
+        if (closestButton != null)
+        {
+            closestButton.AddToClassList("selected");
+            selectedButton = closestButton;
+        }
+    }
+
+    private void CenterButtonInScrollView(VisualElement button)
+    {
+        float containerHeight = scrollView.worldBound.height;
+        float buttonHeight = button.resolvedStyle.height;
+        float buttonTop = button.layout.y;
+
+        float targetOffset = buttonTop - (containerHeight - buttonHeight) / 2f;
+        currentScrollTargetY = targetOffset;
+        isUserScrolling = true;
     }
 }
