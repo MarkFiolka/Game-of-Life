@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class DynamicScrollView : MonoBehaviour
@@ -10,7 +11,8 @@ public class DynamicScrollView : MonoBehaviour
     void OnEnable()
     {
         var root = GetComponent<UIDocument>().rootVisualElement;
-        scrollView = ScrollUIBuilder.BuildScrollUI(root);
+        var (scroll, previewArea, useButton) = ScrollUIBuilder.BuildUI(root);
+        scrollView = scroll;
 
         patternList = GetComponent<PatternList>();
         if (patternList == null)
@@ -19,9 +21,22 @@ public class DynamicScrollView : MonoBehaviour
             return;
         }
 
-        scrollLogic = new ScrollLogic(scrollView, patternList);
+        var previewBoard = new PatternPreviewBoard(previewArea);
+        scrollLogic = new ScrollLogic(scrollView, patternList, previewBoard);
         scrollLogic.PopulateButtons();
         scrollLogic.CenterInitialScroll();
+        
+        useButton.clickable.clicked += () =>
+        {
+            Pattern selectedPattern = scrollLogic.GetSelectedPattern();
+            if (selectedPattern != null)
+            {
+                Debug.Log("Selected Pattern: " + selectedPattern.name);
+                PatternReceiver.Instance.UsePattern(selectedPattern);
+                SceneManager.LoadScene("Game of Life");
+                SceneManager.UnloadScene("Game of Life UI");
+            }
+        };
     }
 
     void LateUpdate()

@@ -22,7 +22,7 @@ public class GameBoard : MonoBehaviour
 
     private void Start()
     {
-        SetPattern(pattern);
+        SetPattern(PatternReceiver.Instance.GetPattern());
     }
 
     private void SetPattern(Pattern pattern)
@@ -78,7 +78,6 @@ public class GameBoard : MonoBehaviour
     {
         cellsToCheck.Clear();
 
-        // Gather cells to check
         foreach (Vector3Int cell in aliveCells)
         {
             for (int x = -1; x <= 1; x++)
@@ -90,7 +89,6 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        // Transition cells to the next state
         foreach (Vector3Int cell in cellsToCheck)
         {
             int neighbors = CountNeighbors(cell);
@@ -142,10 +140,5 @@ public class GameBoard : MonoBehaviour
     private bool IsAlive(Vector3Int cell)
     {
         return currentState.GetTile(cell) == aliveTile;
-    }
-    
-    public void SetPatternPublic(Pattern pattern)
-    {
-        SetPattern(pattern);
     }
 }

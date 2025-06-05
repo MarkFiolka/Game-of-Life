@@ -521,7 +521,7 @@ MonoBehaviour:
   aliveTile: {fileID: 11400000, guid: be4c83ea78c16514a9879a48ece224c8, type: 2}
   deadTile: {fileID: 0}
   pattern: {fileID: 0}
-  updateInterval: 0.001
+  updateInterval: 0.1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

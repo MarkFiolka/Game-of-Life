@@ -25,5 +25,4 @@ public class Pattern : ScriptableObject
 
         return (min + max) / 2;
     }
-
 }
